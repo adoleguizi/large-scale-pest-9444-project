@@ -27,6 +27,7 @@ test-full: ## Run all tests
 	pytest
 
 
+
 ## Train the model, use `trainer=cpu` if use cpu, `model.net.freeze=false` if you want to unfreeze all layer. `logger=wandb` to use wandb as logging
 # python pest_rec/train.py \
 # 		ckpt_path='./logs/train/runs/2023-06-28_23-10-21/checkpoints/epoch_009.ckpt' \
