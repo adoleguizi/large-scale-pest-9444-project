@@ -8,6 +8,8 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
+import numpy as np
+from torch.utils.data import Subset
 
 
 class IP102DataModule(LightningDataModule):
@@ -48,6 +50,7 @@ class IP102DataModule(LightningDataModule):
         batch_size: int = 64,
         num_workers: int = 16,
         pin_memory: bool = False,
+        subset_fraction: float = 1.0,  # 添加新参数
     ):
         super().__init__()
 
@@ -59,6 +62,7 @@ class IP102DataModule(LightningDataModule):
         self.train_dir = train_dir
         self.val_dir = val_dir
         self.test_dir = test_dir
+        self.subset_fraction = subset_fraction  # 保存新参数
 
         # data augmentation
         self.augmentation = transforms.Compose([
@@ -149,9 +153,30 @@ class IP102DataModule(LightningDataModule):
         """
 
         # load and split datasets only if not loaded already
-        self.data_train = datasets.ImageFolder(self.train_dir, transform=self.augmentation)
-        self.data_val = datasets.ImageFolder(self.val_dir, transform=self.transforms)
-        self.data_test = datasets.ImageFolder(self.test_dir, transform=self.transforms)
+        # self.data_train = datasets.ImageFolder(self.train_dir, transform=self.augmentation)
+        # self.data_val = datasets.ImageFolder(self.val_dir, transform=self.transforms)
+        # self.data_test = datasets.ImageFolder(self.test_dir, transform=self.transforms)
+        # 如果数据集已加载，避免重复加载
+        if self.data_train is None:
+            if self.subset_fraction < 1.0:
+                # 如果设置了 subset_fraction，仅对训练数据集加载完整数据集并应用子集逻辑
+                full_train_dataset = datasets.ImageFolder(self.train_dir, transform=self.augmentation)
+                subset_size = int(len(full_train_dataset) * self.subset_fraction)
+                indices = np.random.choice(len(full_train_dataset), subset_size, replace=False)
+                self.data_train = Subset(full_train_dataset, indices)
+                print(f"Loaded training subset: {len(self.data_train)} / {len(full_train_dataset)}")
+            else:
+                self.data_train = datasets.ImageFolder(self.train_dir, transform=self.augmentation)
+                print(f"Loaded full training data: {len(self.data_train)}")
+
+        if self.data_val is None:
+            self.data_val = datasets.ImageFolder(self.val_dir, transform=self.transforms)
+            print(f"Loaded validation data: {len(self.data_val)}")
+
+        if self.data_test is None:
+            self.data_test = datasets.ImageFolder(self.test_dir, transform=self.transforms)
+            print(f"Loaded test data: {len(self.data_test)}")
+
 
     def train_dataloader(self):
         """Returns a DataLoader for the training dataset.

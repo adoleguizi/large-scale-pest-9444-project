@@ -34,6 +34,13 @@ test-full: ## Run all tests
 # 		model.net.freeze=false \
 # 		logger=wandb \
 # 		logger.wandb.id=b49b9fpd
-train: 
-	python pest_rec/train.py trainer=gpu model.net.freeze=true logger=wandb
-	
+#train:
+#	python3 pest_rec/train.py trainer=gpu model.net.freeze=true logger=wandb data.subset_fraction=0.1
+train:
+	python3 pest_rec/train.py \
+	ckpt_path='./logs/train/runs/2024-07-11_19-37-54/checkpoints/epoch_087.ckpt' \
+	trainer=gpu \
+	model.net.freeze=false \
+	logger=wandb \
+	logger.wandb.id=b49b9fpd \
+    data.subset_fraction=0.1

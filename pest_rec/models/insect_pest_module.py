@@ -11,67 +11,66 @@ from torchmetrics.classification.accuracy import Accuracy
 
 
 class InsectPestLitModule(pl.LightningModule):
-     """LightningModule implementation for training and evaluating an insect pest classifier.
+    """LightningModule implementation for training and evaluating an insect pest classifier.
 
-     Args:
-        net (torch.nn.Module, optional): The neural network model. If not provided, a default
-            InsectPestClassifier model will be used. Default is None.
-        optimizer (torch.optim.Optimizer, optional): The optimizer for training the model. Default
-            is torch.optim.Adam.
-        scheduler (torch.optim.lr_scheduler, optional): The learning rate scheduler for adjusting the
-            learning rate during training. Default is torch.optim.lr_scheduler.ReduceLROnPlateau.
-        num_classes (int, optional): The number of classes in the classification task. Default is 102.
-        freeze (bool, optional): Flag indicating whether to freeze the weights of the model during training.
-            Default is True.
+    Args:
+       net (torch.nn.Module, optional): The neural network model. If not provided, a default
+           InsectPestClassifier model will be used. Default is None.
+       optimizer (torch.optim.Optimizer, optional): The optimizer for training the model. Default
+           is torch.optim.Adam.
+       scheduler (torch.optim.lr_scheduler, optional): The learning rate scheduler for adjusting the
+           learning rate during training. Default is torch.optim.lr_scheduler.ReduceLROnPlateau.
+       num_classes (int, optional): The number of classes in the classification task. Default is 102.
+       freeze (bool, optional): Flag indicating whether to freeze the weights of the model during training.
+           Default is True.
 
-     Attributes:
-        net (torch.nn.Module): The neural network model.
-        criterion (torch.nn.CrossEntropyLoss): The loss function for the classifier.
-        train_acc (Accuracy): Metric object for calculating and averaging accuracy during training.
-        val_acc (Accuracy): Metric object for calculating and averaging accuracy during validation.
-        test_acc (Accuracy): Metric object for calculating and averaging accuracy during testing.
-        train_loss (MeanMetric): Metric object for averaging loss during training.
-        val_loss (MeanMetric): Metric object for averaging loss during validation.
-        test_loss (MeanMetric): Metric object for averaging loss during testing.
-        val_acc_best (MaxMetric): Metric object for tracking the best validation accuracy so far.
+    Attributes:
+       net (torch.nn.Module): The neural network model.
+       criterion (torch.nn.CrossEntropyLoss): The loss function for the classifier.
+       train_acc (Accuracy): Metric object for calculating and averaging accuracy during training.
+       val_acc (Accuracy): Metric object for calculating and averaging accuracy during validation.
+       test_acc (Accuracy): Metric object for calculating and averaging accuracy during testing.
+       train_loss (MeanMetric): Metric object for averaging loss during training.
+       val_loss (MeanMetric): Metric object for averaging loss during validation.
+       test_loss (MeanMetric): Metric object for averaging loss during testing.
+       val_acc_best (MaxMetric): Metric object for tracking the best validation accuracy so far.
 
-     Methods:
-        forward(x: torch.Tensor) -> torch.Tensor:
-            Performs a forward pass through the network.
-        on_train_start():
-            Callback function called at the beginning of the training.
-        model_step(batch: Any, apply_cutmix: bool = False) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-            Performs a single step in the training/validation/test process.
-        training_step(batch: Any, batch_idx: int) -> torch.Tensor:
-            Performs a training step on a batch of data.
-        on_train_epoch_end():
-            Callback function called at the end of each training epoch.
-        validation_step(batch: Any, batch_idx: int):
-            Performs a validation step on a batch of data.
-        on_validation_epoch_end():
-            Callback function called at the end of each validation epoch.
-        test_step(batch: Any, batch_idx: int):
-            Performs a test step on a batch of data.
-        on_test_epoch_end():
-            Callback function called at the end of each testing epoch.
-        configure_optimizers() -> Union[Dict, Tuple]:
-            Configures the optimizers and learning rate schedulers for the training process.
-
-    """
+    Methods:
+       forward(x: torch.Tensor) -> torch.Tensor:
+           Performs a forward pass through the network.
+       on_train_start():
+           Callback function called at the beginning of the training.
+       model_step(batch: Any, apply_cutmix: bool = False) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+           Performs a single step in the training/validation/test process.
+       training_step(batch: Any, batch_idx: int) -> torch.Tensor:
+           Performs a training step on a batch of data.
+       on_train_epoch_end():
+           Callback function called at the end of each training epoch.
+       validation_step(batch: Any, batch_idx: int):
+           Performs a validation step on a batch of data.
+       on_validation_epoch_end():
+           Callback function called at the end of each validation epoch.
+       test_step(batch: Any, batch_idx: int):
+           Performs a test step on a batch of data.
+       on_test_epoch_end():
+           Callback function called at the end of each testing epoch.
+       configure_optimizers() -> Union[Dict, Tuple]:
+           Configures the optimizers and learning rate schedulers for the training process.
+   """
 
     def __init__(
-        self,
-        net: torch.nn.Module = None,
-        optimizer: torch.optim.Optimizer = torch.optim.Adam,
-        scheduler: torch.optim.lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau,
-        num_classes: int = 102,
-        freeze: bool = True,
+            self,
+            net: torch.nn.Module = None,
+            optimizer: torch.optim.Optimizer = torch.optim.Adam,
+            scheduler: torch.optim.lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau,
+            num_classes: int = 102,
+            freeze: bool = True,
     ):
         super().__init__()
 
         if net is None:
             net = InsectPestClassifier(output_size=num_classes, freeze=freeze)
-            
+
         # this line allows to access init params with 'self.hparams' attribute
         # also ensures init params will be stored in ckpt
         self.save_hyperparameters(logger=False)
